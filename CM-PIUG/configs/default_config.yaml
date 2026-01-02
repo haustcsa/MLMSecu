@@ -1,0 +1,151 @@
+# CM-PIUG Default Configuration
+# 跨模态提示注入统一攻击面图框架配置
+
+# ==================== 随机种子 ====================
+seed:
+  global_seed: 42
+  numpy_seed: 42
+  torch_seed: 42
+
+# ==================== 运行环境 ====================
+environment:
+  device: "cpu"  # cpu, cuda, cuda:0
+  num_workers: 4
+  log_level: "INFO"
+
+# ==================== 检测模块配置 (Algorithm 1) ====================
+detection:
+  # 风险阈值 τ
+  risk_threshold: 0.5
+  
+  # 语义权重 λ (边置信度计算)
+  lambda_weight: 0.3
+  
+  # 最大路径搜索深度
+  max_path_depth: 20
+  
+  # BFS配置
+  bfs:
+    max_iterations: 1000
+    early_stop: true
+
+# ==================== 解析器配置 ====================
+parser:
+  ocr_enabled: true
+  asr_enabled: true
+  
+  # OCR配置
+  ocr:
+    engine: "tesseract"  # tesseract, easyocr, paddleocr
+    confidence_threshold: 0.6
+    languages: ["en", "zh"]
+  
+  # ASR配置
+  asr:
+    engine: "whisper"  # whisper, speechrecognition
+    confidence_threshold: 0.7
+    language: "auto"
+  
+  # 指令检测模式
+  instruction_patterns:
+    - 'ignore\s+(previous|above|all)'
+    - 'forget\s+(everything|previous)'
+    - 'new\s+instruction'
+    - 'system\s*:'
+    - 'you\s+are\s+(now|a)'
+    - 'pretend\s+(to\s+be|you)'
+    - 'act\s+as'
+    - 'override'
+    - 'bypass'
+    - 'jailbreak'
+    - 'DAN'
+    - 'developer\s+mode'
+
+# ==================== 语义等价配置 ====================
+semantic:
+  # 蕴含判定阈值
+  entailment_threshold: 0.7
+  
+  # 语义相似度阈值
+  similarity_threshold: 0.85
+  
+  # 语义熵阈值 (低于此值认为语义集中)
+  entropy_threshold: 0.5
+  
+  # 是否使用真实NLI模型
+  use_real_model: false
+  
+  # 模型配置 (use_real_model=true时生效)
+  encoder_model: "all-MiniLM-L6-v2"
+  nli_model: "facebook/bart-large-mnli"
+
+# ==================== 规则引擎配置 ====================
+rules:
+  # 规则文件路径
+  rules_file: "data/rules/primitive_rules.json"
+  
+  # 最大推理迭代次数
+  max_inference_iterations: 100
+  
+  # 规则置信度衰减
+  confidence_decay: 0.95
+
+# ==================== 博弈求解配置 (Algorithm 2) ====================
+defense:
+  # 内层MFG配置
+  mfg:
+    inner_tolerance: 1.0e-4
+    max_inner_iterations: 100
+    gamma: 0.95  # 折扣因子
+    temperature: 0.5  # 软最大温度
+    update_rate: 0.5  # 均值场更新率
+  
+  # 外层Stackelberg配置
+  stackelberg:
+    outer_tolerance: 1.0e-3
+    max_outer_iterations: 100
+    learning_rate: 0.01
+  
+  # 效用权重
+  utility:
+    risk_weight: 1.0
+    cost_weight: 0.3
+    attack_success_weight: 1.0
+    detection_penalty: 0.5
+    congestion_factor: 0.1
+
+# ==================== 系统上下文 ====================
+system_prompt: |
+  You are a helpful AI assistant. You should follow the user's instructions 
+  and provide accurate, helpful responses. You must not engage in any 
+  harmful, unethical, or illegal activities.
+
+# ==================== 系统事实 ====================
+system_facts:
+  - "text_input_enabled"
+  - "ocr_enabled"
+  - "asr_enabled"
+  - "tool_available_search"
+  - "tool_available_browse"
+  - "privilege_level_0"
+
+# ==================== 评估指标配置 ====================
+evaluation:
+  metrics:
+    - "asr"           # Attack Success Rate
+    - "detection_f1"  # Detection F1 Score
+    - "fpr_at_95tpr"  # FPR @ 95% TPR
+    - "defense_cost"  # Defense Cost Ratio
+  
+  # 阈值扫描范围
+  threshold_range:
+    start: 0.1
+    end: 0.9
+    step: 0.1
+
+# ==================== 日志配置 ====================
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/cm_piug.log"
+  console: true

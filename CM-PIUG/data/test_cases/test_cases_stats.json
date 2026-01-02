@@ -1,0 +1,18 @@
+{
+  "total": 80,
+  "by_modality": {
+    "text": 50,
+    "image": 16,
+    "audio": 10,
+    "text+image": 4
+  },
+  "by_difficulty": {
+    "easy": 64,
+    "medium": 14,
+    "hard": 2
+  },
+  "malicious_vs_benign": {
+    "malicious": 64,
+    "benign": 16
+  }
+}

@@ -1,0 +1,8 @@
+# CM-PIUG 最小依赖
+# 仅包含核心功能所需的依赖
+
+numpy>=1.21.0
+scipy>=1.7.0
+networkx>=2.6.0
+pyyaml>=6.0
+tqdm>=4.62.0
